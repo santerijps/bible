@@ -1,0 +1,17 @@
+{
+    "tasks": {
+        "dev": "deno bundle --watch -o docs/index.js index.ts & deno fmt --watch",
+        "bundle": "deno bundle -o docs/index.js --minify index.ts"
+    },
+    "compilerOptions": {
+        "lib": [
+            "deno.window",
+            "dom",
+            "dom.iterable"
+        ]
+    },
+    "fmt": {
+        "indentWidth": 4,
+        "lineWidth": 130
+    }
+}

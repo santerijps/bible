@@ -1,0 +1,45 @@
+body {
+    font-size: 16pt;
+    margin-inline: auto;
+    max-width: 80ch;
+}
+
+table {
+    table-layout: auto;
+
+    th[role="rowheader"] {
+        background-color: whitesmoke;
+        font-family: sans-serif;
+        font-size: 18pt;
+        padding-block: 1ch;
+        position: sticky;
+        text-align: center;
+        text-transform: uppercase;
+        top: 0;
+    }
+
+    td {
+        padding-block: 0.5ch;
+        vertical-align: top;
+    }
+
+    td:nth-child(1) {
+        font-family: sans-serif;
+        font-weight: bold;
+        padding-inline-start: 1ch;
+        text-align: right;
+    }
+
+    td:nth-child(2) {
+        font-family: serif;
+        padding-inline-start: 2ch;
+        padding-inline-end: 2ch;
+        text-align: justify;
+    }
+}
+
+@media only screen and (max-width: 600px) {
+    td:nth-child(1) {
+        padding-inline-start: 0 !important;
+    }
+}
