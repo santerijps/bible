@@ -1,2 +1,137 @@
-function l(n,o){console.time(n.name);let t=n(...o??[]);return console.timeEnd(n.name),t}async function d(n,o){console.time(n.name);let t=await n(...o??[]);return console.timeEnd(n.name),t}function m(){return new Promise((n,o)=>{let t=indexedDB.open("BibleQueryDB"),c=!1;t.onsuccess=async()=>{if(!c){let r=t.result,e=await f(r,"fin-33-38");n(e)}},t.onupgradeneeded=()=>{c=!0;let r=t.result;r.createObjectStore("fin-33-38",{autoIncrement:!0}).transaction.oncomplete=async()=>{let e=await d(h,["fin-33-38"]),s=t.result.transaction("fin-33-38","readwrite"),a=s.objectStore("fin-33-38");for(let i of e)a.add(i);s.oncomplete=()=>{n(e)},s.onerror=i=>{o(i)}}},t.onerror=r=>{o(r)}})}function f(n,o){return new Promise((t,c)=>{let r=n.transaction(o,"readonly"),e=r.objectStore(o).getAll(),s=[];r.oncomplete=()=>{t(s)},r.onerror=a=>{c(a)},e.onsuccess=()=>{s=e.result}})}async function h(n){let t=await(await fetch(`data/${n}.txt`)).text();return x(t)}function x(n){let o=n.split(`
-`),t=[];o.pop();let c="",r="",e=1,s=1;for(let a of o)if(a.startsWith(";")){let[i,p,u]=a.split(";");c=p,r=u,e=1,s=1}else a.startsWith("+")?(e+=1,s=1):(t.push({id:c,book:r,chapter:e.toString(),verse:s.toString(),text:a}),s+=1);return t}function g(n){let o=document.querySelector("table");if(o===null)throw Error("Table not found!");let t="",c="";for(let r=0;r<n.length;r++){let e=n[r];if(e.book!==t||e.chapter!==c){let p=document.createElement("tr"),u=document.createElement("th");u.colSpan=2,u.innerText=`${e.book}, Luku ${e.chapter}`,u.role="rowheader",p.appendChild(u),o.appendChild(p),t=e.book,c=e.chapter}let s=document.createElement("tr"),a=document.createElement("td"),i=document.createElement("td");a.innerText=e.chapter+":"+e.verse,i.innerText=e.text,s.append(a,i),o.appendChild(s)}}var w=await d(m);l(g,[w]);export{x as customToJSON,m as fetchPassages,f as fetchPassagesFromIDB,h as fetchPassagesFromServer,d as timeAsync,l as timeSync};
+// index.ts
+function timeSync(callback, args) {
+    console.time(callback.name);
+    const output = callback(...args ?? []);
+    console.timeEnd(callback.name);
+    return output;
+}
+async function timeAsync(callback, args) {
+    console.time(callback.name);
+    const output = await callback(...args ?? []);
+    console.timeEnd(callback.name);
+    return output;
+}
+function fetchPassages() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open("BibleQueryDB");
+        let upgradeNeeded = false;
+        request.onsuccess = async () => {
+            if (!upgradeNeeded) {
+                const database = request.result;
+                const passages2 = await fetchPassagesFromIDB(database, "fin-33-38");
+                resolve(passages2);
+            }
+        };
+        request.onupgradeneeded = () => {
+            upgradeNeeded = true;
+            const database = request.result;
+            database.createObjectStore("fin-33-38", {
+                autoIncrement: true,
+            }).transaction.oncomplete = async () => {
+                const passages2 = await timeAsync(fetchPassagesFromServer, [
+                    "fin-33-38",
+                ]);
+                const readWriteTransaction = request.result.transaction("fin-33-38", "readwrite");
+                const rwStore = readWriteTransaction.objectStore("fin-33-38");
+                for (const passage of passages2) {
+                    rwStore.add(passage);
+                }
+                readWriteTransaction.oncomplete = () => {
+                    resolve(passages2);
+                };
+                readWriteTransaction.onerror = (event) => {
+                    reject(event);
+                };
+            };
+        };
+        request.onerror = (event) => {
+            reject(event);
+        };
+    });
+}
+function fetchPassagesFromIDB(db, name) {
+    return new Promise((resolve, reject) => {
+        const readTransaction = db.transaction(name, "readonly");
+        const request = readTransaction.objectStore(name).getAll();
+        let passages2 = [];
+        readTransaction.oncomplete = () => {
+            resolve(passages2);
+        };
+        readTransaction.onerror = (event) => {
+            reject(event);
+        };
+        request.onsuccess = () => {
+            passages2 = request.result;
+        };
+    });
+}
+async function fetchPassagesFromServer(name) {
+    const response = await fetch(`data/${name}.txt`);
+    const text = await response.text();
+    return customToJSON(text);
+}
+function customToJSON(input) {
+    const lines = input.split("\n");
+    const passages2 = [];
+    lines.pop();
+    let id = "";
+    let book = "";
+    let chapter = 1;
+    let verse = 1;
+    for (const line of lines) {
+        if (line.startsWith(";")) {
+            const [_, nextId, nextBook] = line.split(";");
+            id = nextId;
+            book = nextBook;
+            chapter = 1;
+            verse = 1;
+        } else if (line.startsWith("+")) {
+            chapter += 1;
+            verse = 1;
+        } else {
+            passages2.push({
+                id,
+                book,
+                chapter: chapter.toString(),
+                verse: verse.toString(),
+                text: line,
+            });
+            verse += 1;
+        }
+    }
+    return passages2;
+}
+function renderPassages(passages2) {
+    const tableElement = document.querySelector("table");
+    if (tableElement === null) {
+        throw Error("Table not found!");
+    }
+    let currentBook = "";
+    let currentChapter = "";
+    for (let i = 0; i < passages2.length; i++) {
+        const p = passages2[i];
+        if (p.book !== currentBook || p.chapter !== currentChapter) {
+            const tr2 = document.createElement("tr");
+            const th = document.createElement("th");
+            th.colSpan = 2;
+            th.innerText = `${p.book}, Luku ${p.chapter}`;
+            th.role = "rowheader";
+            tr2.appendChild(th);
+            tableElement.appendChild(tr2);
+            currentBook = p.book;
+            currentChapter = p.chapter;
+        }
+        const tr = document.createElement("tr");
+        const verseTd = document.createElement("td");
+        const textTd = document.createElement("td");
+        verseTd.innerText = p.chapter + ":" + p.verse;
+        textTd.innerText = p.text;
+        tr.append(verseTd, textTd);
+        tableElement.appendChild(tr);
+    }
+}
+var passages = await timeAsync(fetchPassages);
+timeSync(renderPassages, [
+    passages,
+]);
+export { customToJSON, fetchPassages, fetchPassagesFromIDB, fetchPassagesFromServer, timeAsync, timeSync };
