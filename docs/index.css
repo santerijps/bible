@@ -12,6 +12,7 @@ table {
         font-family: sans-serif;
         font-size: 18pt;
         padding-block: 1ch;
+        padding-inline: 1ch;
         position: sticky;
         text-align: center;
         text-transform: uppercase;
