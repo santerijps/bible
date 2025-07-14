@@ -4,7 +4,16 @@ body {
     max-width: 80ch;
 }
 
-table {
+input[id="query-input"] {
+    border: none;
+    margin-block-start: 1ch;
+    outline: 1px solid;
+    padding-block: 1ch;
+    padding-inline: 1ch;
+    width: 100%;
+}
+
+table[id="query-output"] {
     table-layout: auto;
 
     th[role="rowheader"] {
@@ -40,6 +49,11 @@ table {
 }
 
 @media only screen and (max-width: 600px) {
+    input[id="query-input"] {
+        display: block;
+        margin-inline: auto;
+        width: 95%;
+    }
     td:nth-child(1) {
         padding-inline-start: 0 !important;
     }
