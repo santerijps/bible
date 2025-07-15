@@ -1,4 +1,5 @@
-import type { AnyAsyncFunction, AnySyncFunction } from "./types.ts";
+// deno-lint-ignore-file no-explicit-any
+import type { AnyAsyncFunction, AnyAsyncVoidFunction, AnySyncFunction, AnySyncVoidFunction } from "./types.ts";
 
 export function getElement<T extends HTMLElement>(selector: string) {
     const element = document.querySelector(selector);
@@ -30,4 +31,18 @@ export async function timeAsync<T extends AnyAsyncFunction>(
     const output = await callback(...(args ?? []));
     console.timeEnd(label);
     return output;
+}
+
+export function debounce(
+    callback: AnySyncVoidFunction | AnyAsyncVoidFunction,
+    timeoutMs: number,
+) {
+    let timeoutId: number | undefined = undefined;
+    return (...args: any[]) => {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(
+            () => callback(...args),
+            timeoutMs,
+        );
+    };
 }

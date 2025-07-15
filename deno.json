@@ -1,7 +1,7 @@
 {
     "tasks": {
-        "dev": "deno bundle --watch -o docs/index.js src/main.ts & deno fmt --watch",
-        "bundle": "deno bundle --platform browser --minify -o docs/index.js src/main.ts"
+        "dev": "deno bundle --watch --outdir docs src/index.ts src/worker.ts & deno fmt --watch",
+        "bundle": "deno bundle --platform browser --minify --outdir docs src/index.ts src/worker.ts"
     },
     "compilerOptions": {
         "lib": [

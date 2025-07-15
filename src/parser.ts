@@ -182,7 +182,8 @@ export function parseQueryString(input: string) {
     const inputs = input
         .toLowerCase()
         .split(";")
-        .map((x) => x.trim());
+        .map((it) => it.trim())
+        .filter((it) => it.length > 0);
 
     const queries = Array<PassageQuery>();
 

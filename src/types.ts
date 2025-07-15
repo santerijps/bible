@@ -13,6 +13,9 @@ export type Passage = {
 export type AnySyncFunction = (...args: any[]) => any;
 export type AnyAsyncFunction = (...args: any[]) => Promise<any>;
 
+export type AnySyncVoidFunction = (...args: any[]) => void;
+export type AnyAsyncVoidFunction = (...args: any[]) => Promise<void>;
+
 export type PassageQuery = {
     book?: string;
     chapter?: string;
@@ -23,4 +26,12 @@ export type PassageQuery = {
 export type VerseQuery = {
     from: number;
     to?: number;
+};
+
+export type WorkerEvent = {
+    type: "loader";
+    isLoading: boolean;
+} | {
+    type: "query";
+    results: Passage[];
 };
